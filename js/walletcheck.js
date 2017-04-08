@@ -1,9 +1,8 @@
 const fs = require('fs');
 const sql = require('sql.js');
-const path = require('path');
-var os = require("os");
+let conf = require("./util/conf");
 
-let wallet_db_url = path.join(os.homedir(),"db.sqlite");
+let wallet_db_url = conf.db_file;
 fs.access(wallet_db_url, function(err) {
     if(err){
         var db = new sql.Database();

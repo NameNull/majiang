@@ -1,10 +1,10 @@
 {
-  "name": "麻将",
+  "name": "majiang",
   "version": "1.0.0",
   "main": "js/main.js",
   "scripts": {
-    "start": "electron .",
-    "shellbuild": "export NODE_ENV=production&& webpack -p && gulp"
+    "start": "./node_modules/electron/cli.js .",
+    "build": "./node_modules/webpack/bin/webpack.js -w"
   },
   "dependencies": {
     "sql.js": "^0.4.0"

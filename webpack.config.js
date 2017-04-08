@@ -1,35 +1,17 @@
 'use strict';
-
-var webpack = require('webpack');
-var version = require('./package.json').version;
-
-var configPlugin = new webpack.DefinePlugin({
-    "process.env": {
-        NODE_ENV: process.env.NODE_ENV ? JSON.stringify(process.env.NODE_ENV) : JSON.stringify("development")
-    }
-});
+let path = require("path");
 
 module.exports = {
     target : "electron-renderer",
     entry: {
-        'index': __dirname + '/index.js'
+        'index': path.resolve(__dirname, 'index.js')
     },
     output: {
-        path: `./build/${version}`,
-        publicPath: `build/${version}`,
+        path: './build',
         filename: '[name].js'
     },
     externals: {
-        'window': 'window',
-        'document': 'document',
-        'wx': 'wx',
-        'sql': 'SQL',
         "jquery": 'jQuery'
-    },
-    resolve: {
-        alias: {
-        },
-        extensions: ['', '.js', '.jsx']
     },
     module: {
         loaders: [
@@ -43,6 +25,5 @@ module.exports = {
             },
         ]
 
-    },
-    plugins: [configPlugin]
+    }
 };

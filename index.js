@@ -1,11 +1,10 @@
 var $ = require("jquery");
 import  "./js/util/sgutil";
-let os = require("os");
 let fs = require("fs");
-var post_id = 1;
+let conf = require("./js/util/conf");
 
-let db_file = 'http://43.230.141.43:8011/db.sqlite';
-db_file = os.homedir()+'/db.sqlite';
+let db_file = conf.db_file;
+var post_id = 1;
 
 function db_connect(callback){
     let worker = new Worker(process.cwd() + "/js/util/worker.sql.js");
@@ -64,7 +63,6 @@ function db_add(param){
                 console.log('The file has been saved!');
             });
             res && res();
-            return;
             location.reload(true);
         };
         let create_time = new Date().getTime();

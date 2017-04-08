@@ -1,7 +1,7 @@
 const {app,BrowserWindow,globalShortcut,ipcMain,dialog} = require('electron');
 const path = require('path');
 const url = require('url');
-//require ("./walletcheck");
+require ("./walletcheck");
 
 let mainWindow;
 
