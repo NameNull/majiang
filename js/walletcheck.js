@@ -10,7 +10,7 @@ fs.access(wallet_db_url, function(err) {
         db.run(sql_str);
         var data = db.export();
         var buffer = new Buffer(data);
-        fs.writeFileSync(wallet_db_url, buffer);
+        fs.writeFile(wallet_db_url, buffer);
         db.close();
     }
 });

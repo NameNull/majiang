@@ -1,4 +1,4 @@
-const {Menu, app, shell, dialog, ipcMain} = require('electron');
+const {Menu} = require('electron');
 
 let mainWindow;
 
