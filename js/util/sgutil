@@ -57,3 +57,13 @@ Array.prototype.max = function() {
     }
     return max;
 };
+Array.prototype.find = function(value) {
+    var num = 0;
+    var len = this.length;
+    for (var i = 0; i < len; i++){
+        if (this[i] == value) {
+            num++;
+        }
+    }
+    return num;
+};

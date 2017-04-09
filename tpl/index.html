@@ -3,13 +3,16 @@
 <head>
   <meta charset="utf-8">
   <style>
+    body{padding:10px 20px;}
+    *{padding:0;margin:0;line-height:1.5;}
     table{margin-right:100px;border-collapse: collapse;border-spacing: 0;}
     table th{background:#f1f1f1;}
     table td{text-align: center;}
     table th,table td{border:1px solid #ccc;width:100px;}
     table td.red{color:red;}
     table td.gray{color:#ccc;}
-    table td{color:green;}
+    table td.blue{color:dodgerblue;}
+    table td{color:green;position:relative;height:50px;}
     table td:nth-child(7),
     table td:nth-child(6),
     table td:nth-child(5),
@@ -20,20 +23,41 @@
     table td:nth-child(10),
     table td:nth-child(11),
     table td:nth-child(12){background:#96ab96;}
+    .cp{cursor:pointer;}
+    .dn{display:none;}
     #date{
       width:300px;height:40px;line-height:40px;margin-bottom:30px;
     }
+    input{height:25px;line-height:25px;padding-left:5px;}
+    .input_box{border:1px solid #ccc;padding:10px 20px; }
+    .mask{line-height:50px;position:absolute;top:0px;left:0px;width:100%;height:100%;background:rgba(0,0,0,0.5);color:dodgerblue;}
   </style>
 </head>
 <body>
 <h3>倍率：</h3>
 <input type="text" value="3" id="rate">
 <h3>输入：</h3>
-<input placeholder="玩家1" id="user1"/>
-<input placeholder="玩家2" id="user2"/>
-<input placeholder="玩家3" id="user3"/>
-<input placeholder="玩家4" id="user4"/>
-<input type="button" value="确认" id="confirm"/>
+<div class="input_box">
+  <div>
+    <p>名字：</p>
+    <p>
+      <input placeholder="玩家1" id="name1"/>
+      <input placeholder="玩家2" id="name2"/>
+      <input placeholder="玩家3" id="name3"/>
+      <input placeholder="玩家4" id="name4"/>
+    </p>
+  </div>
+  <div>
+    <p>分数：</p>
+    <p>
+      <input placeholder="分数1" id="user1"/>
+      <input placeholder="分数2" id="user2"/>
+      <input placeholder="分数3" id="user3"/>
+      <input placeholder="分数4" id="user4"/>
+    </p>
+  </div>
+  <input type="button" value="确认" id="confirm"/>
+</div>
 <h3>输赢记录</h3>
 <input type="text" placeholder="日期／格式如：2017-04-04，按回车查询" id="date"／>  总条数：<span id="total">0</span>
 <table id="tab">
@@ -50,6 +74,7 @@
     <th>玩家3</th>
     <th>玩家4</th>
     <th>总计</th>
+    <th>备注</th>
     <th>操作</th>
   </tr>
 </table>
