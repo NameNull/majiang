@@ -11,7 +11,8 @@ module.exports = {
         filename: '[name].js'
     },
     externals: {
-        "jquery": 'jQuery'
+        "jquery": 'jQuery',
+        "sql": 'SQL'
     },
     module: {
         loaders: [

@@ -2,173 +2,7 @@ var $ = require("jquery");
 import  "./js/util/sgutil";
 let fs = require("fs");
 let path = require("path");
-let conf = require("./js/util/conf");
-
-let db_file = conf.db_file;
-var post_id = 1;
-
-function db_connect(callback){
-    let worker = new Worker("https://s1.zhgtrade.com/common/js/worker.sql.js");
-    worker.onerror = function(e) {console.log("Worker error: ", e)};
-    let xhr = new XMLHttpRequest();
-    xhr.open('GET', db_file, true);
-    xhr.responseType = 'arraybuffer';
-    xhr.send();
-    xhr.onload = function(e) {
-        console.log("open");
-        worker.postMessage({
-            id:post_id++,
-            action:'open',
-            buffer:this.response, /*Optional. An ArrayBuffer representing an SQLite Database file*/
-        });
-        let result = () => {
-            console.log("close");
-            worker.postMessage({
-                id:post_id++,
-                action:'close'
-            });
-        };
-        worker.onmessage = function() {
-            callback && callback(worker,result);
-        };
-    };
-}
-
-function db_find(day,callback){
-    db_connect(function(worker,res){
-        console.log("find");
-        let today_begin;
-        let today_end;
-        today_begin = new Date(day).getTime();
-        today_end = today_begin + 24*60*60*1000;
-        worker.onmessage = function(event){
-            console.log("success");
-            callback && callback(event.data.results);
-            res && res();
-        };
-        worker.postMessage({
-            id:post_id++,
-            action: 'exec',
-            sql: "select * from log where create_time between "+today_begin+" and "+today_end+" order by create_time desc;"
-        });
-    });
-}
-
-function db_add(param){
-    db_connect(function(worker,res) {
-        console.log("add");
-        worker.onmessage = function (event) {
-            let buffer = event.data.results;
-            fs.writeFile(db_file, buffer,(err) => {
-                if (err) throw err;
-                console.log('The file has been saved!');
-            });
-            res && res();
-            location.reload(true);
-        };
-        let create_time = new Date().getTime();
-        let sql_str = "insert into log (user1, user2, user3, user4, name1, name2, name3, name4, flag1, flag2, flag3, flag4, note, rate, create_time) values (:user1, :user2, :user3, :user4, :name1, :name2, :name3, :name4, :flag1, :flag2, :flag3, :flag4, :note, :rate, :create_time);";
-        let params = {
-            ":user1": param.user1,
-            ":user2": param.user2,
-            ":user3": param.user3,
-            ":user4": param.user4,
-            ":name1": param.name1,
-            ":name2": param.name2,
-            ":name3": param.name3,
-            ":name4": param.name4,
-            ":flag1": 0,
-            ":flag2": 0,
-            ":flag3": 0,
-            ":flag4": 0,
-            ":note": "",
-            ":rate": param.rate,
-            ":create_time": create_time
-        };
-        worker.postMessage({
-            id: post_id++,
-            action: 'run',
-            params: params,
-            sql: sql_str
-        });
-    });
-}
-
-function db_update(id, flag, status){
-    db_connect(function(worker,res) {
-        console.log("update");
-        worker.onmessage = function (event) {
-            let buffer = event.data.results;
-            fs.writeFile(db_file, buffer,(err) => {
-                if (err) throw err;
-                console.log('The file has been saved!');
-            });
-            res && res();
-            location.reload(true);
-        };
-        let sql_str = "update log set flag"+flag+" = :status where id = :id";
-        let params = {
-            ":status": status,
-            ":id": id
-        };
-        worker.postMessage({
-            id: post_id++,
-            action: 'run',
-            params: params,
-            sql: sql_str
-        });
-    });
-}
-
-function db_update_note(id, note){
-    db_connect(function(worker,res) {
-        console.log("update");
-        worker.onmessage = function (event) {
-            let buffer = event.data.results;
-            fs.writeFile(db_file, buffer,(err) => {
-                if (err) throw err;
-                console.log('The file has been saved!');
-            });
-            res && res();
-            location.reload(true);
-        };
-        let sql_str = "update log set note = :note where id = :id";
-        let params = {
-            ":note": note,
-            ":id": id
-        };
-        worker.postMessage({
-            id: post_id++,
-            action: 'run',
-            params: params,
-            sql: sql_str
-        });
-    });
-}
-
-function db_delete(id){
-    db_connect(function(worker,res) {
-        console.log("delete");
-        worker.onmessage = function (event) {
-            let buffer = event.data.results;
-            fs.writeFile(db_file, buffer,(err) => {
-                if (err) throw err;
-                console.log("delete success");
-            });
-            res && res();
-            location.reload(true);
-        };
-        let sql_str = "delete from log where id = :id;" ;
-        let params = {":id": id};
-        worker.postMessage({
-            id: post_id++,
-            action: 'run',
-            params: params,
-            sql: sql_str
-        });
-    });
-}
-
+let {logDao} = require("./js/api/logDao");
 
 var user1 = $("#user1");
 var user2 = $("#user2");
@@ -180,65 +14,62 @@ var name3 = $("#name3");
 var name4 = $("#name4");
 
 var day = new Date().format("yyyy-MM-dd") + " 00:00:00";
-function find(day){
-    let result = (res) => {
-        var tables = res;
-        if(tables[0] != undefined){
-            var length = tables[0]['values'].length;
-            $("#total").text(length);
-            for(var j = 0 ;j<length;j++){
-                var id = tables[0]['values'][j][0];
-                var html="";
-                var arr = [tables[0]['values'][j][1]*1,tables[0]['values'][j][2]*1,tables[0]['values'][j][3]*1,1*tables[0]['values'][j][4]];
-                var brr = [tables[0]['values'][j][5],tables[0]['values'][j][6],tables[0]['values'][j][7],tables[0]['values'][j][8]];
-                var crr = [tables[0]['values'][j][9],tables[0]['values'][j][10],tables[0]['values'][j][11],tables[0]['values'][j][12]];
-                var note = tables[0]['values'][j][13];
-                var rate = tables[0]['values'][j][14];
-                var time = new Date(tables[0]['values'][j][15]).format('MM-dd HH:mm');
-                html+="<tr data-id='"+id+"'>"+
-                    "<td class='gray'>"+time+"</td>"+
-                    "<td class='gray'>"+rate+"</td>";
-                for(var i=0;i<4;i++){
-                    if(arr[i]<0){
-                        html+="<td class='red'><p>"+(arr[i])+"</p><p>"+brr[i]+"</p></td>";
-                    }else{
-                        html+="<td><p>"+(arr[i])+"</p><p>"+brr[i]+"</p></td>";
-                    }
-                }
-                html+="<td>"+(arr[0]+arr[2]+arr[3]+arr[1])+"</td>";
-                var max = arr.max();
-                var res = 0;
-                var num = arr.find(max);
-                for(var i=0;i<4;i++){
-                    var flag = crr[i] == 0 ? "dn" : "";
-                    if(max == arr[i]){
-                        var result = (max-Math.ceil(20/num))*rate;
-                        res +=result;
-                        if(max-Math.ceil(20/num)<0){
-                            html+="<td class='red cp flag' data-flag='"+i+"' data-status='"+crr[i]+"'><p>"+result+"</p><p>"+brr[i]+"</p><div class='mask  "+flag+"'>√</div></td>";
-                        }else{
-                            html+="<td class='cp flag' data-flag='"+i+"' data-status='"+crr[i]+"'><p>"+result+"</p><p>"+brr[i]+"</p><div class='mask "+flag+"'>√</div></td>";
-                        }
-                    }else{
-                        res+=(arr[i]*rate);
-                        if(arr[i]<0){
-                            html+="<td class='red cp flag' data-flag='"+i+"' data-status='"+crr[i]+"'><p>"+(arr[i]*rate)+"</p><p>"+brr[i]+"</p><div class='mask "+flag+"'>√</div></td>";
-                        }else{
-                            html+="<td class='cp flag' data-flag='"+i+"' data-status='"+crr[i]+"'><p>"+(arr[i]*rate)+"</p><p>"+brr[i]+"</p><div class='mask "+flag+"'>√</div></td>";
-                        }
-                    }
-                }
-                html+="<td>"+res+"</td>"+
-                    "<td class='note blue' data-val='"+note+"' contenteditable='true'>"+note+"</td>"+
-                    "<td><a href='javascript:;' class='delete red'>删除</a></td>"+
-                    "</tr>";
-                $("#tab").append(html);
-            }
-        }
-    };
-    db_find(day,result);
-}
 find(day);
+function find(day){
+    var tables = logDao.find(day);
+    if(tables[0] != undefined){
+        var length = tables[0]['values'].length;
+        $("#total").text(length);
+        for(var j = 0 ;j<length;j++){
+            var id = tables[0]['values'][j][0];
+            var html="";
+            var arr = [tables[0]['values'][j][1]*1,tables[0]['values'][j][2]*1,tables[0]['values'][j][3]*1,1*tables[0]['values'][j][4]];
+            var brr = [tables[0]['values'][j][5],tables[0]['values'][j][6],tables[0]['values'][j][7],tables[0]['values'][j][8]];
+            var crr = [tables[0]['values'][j][9],tables[0]['values'][j][10],tables[0]['values'][j][11],tables[0]['values'][j][12]];
+            var note = tables[0]['values'][j][13];
+            var rate = tables[0]['values'][j][14];
+            var time = new Date(tables[0]['values'][j][15]).format('MM-dd HH:mm');
+            html+="<tr data-id='"+id+"'>"+
+                "<td class='gray'>"+time+"</td>"+
+                "<td class='gray'>"+rate+"</td>";
+            for(var i=0;i<4;i++){
+                if(arr[i]<0){
+                    html+="<td class='red'><p>"+(arr[i])+"</p><p>"+brr[i]+"</p></td>";
+                }else{
+                    html+="<td><p>"+(arr[i])+"</p><p>"+brr[i]+"</p></td>";
+                }
+            }
+            html+="<td>"+(arr[0]+arr[2]+arr[3]+arr[1])+"</td>";
+            var max = arr.max();
+            var res = 0;
+            var num = arr.find(max);
+            for(var i=0;i<4;i++){
+                var flag = crr[i] == 0 ? "dn" : "";
+                if(max == arr[i]){
+                    var result = (max-Math.ceil(20/num))*rate;
+                    res +=result;
+                    if(max-Math.ceil(20/num)<0){
+                        html+="<td class='red cp flag' data-flag='"+i+"' data-status='"+crr[i]+"'><p>"+result+"</p><p>"+brr[i]+"</p><div class='mask  "+flag+"'>√</div></td>";
+                    }else{
+                        html+="<td class='cp flag' data-flag='"+i+"' data-status='"+crr[i]+"'><p>"+result+"</p><p>"+brr[i]+"</p><div class='mask "+flag+"'>√</div></td>";
+                    }
+                }else{
+                    res+=(arr[i]*rate);
+                    if(arr[i]<0){
+                        html+="<td class='red cp flag' data-flag='"+i+"' data-status='"+crr[i]+"'><p>"+(arr[i]*rate)+"</p><p>"+brr[i]+"</p><div class='mask "+flag+"'>√</div></td>";
+                    }else{
+                        html+="<td class='cp flag' data-flag='"+i+"' data-status='"+crr[i]+"'><p>"+(arr[i]*rate)+"</p><p>"+brr[i]+"</p><div class='mask "+flag+"'>√</div></td>";
+                    }
+                }
+            }
+            html+="<td>"+res+"</td>"+
+                "<td class='note blue' data-val='"+note+"' contenteditable='true'>"+note+"</td>"+
+                "<td><a href='javascript:;' class='delete red'>删除</a></td>"+
+                "</tr>";
+            $("#tab").append(html);
+        }
+    }
+}
 
 $("#confirm").click(function(){
     var rate = $("#rate").val()*1;
@@ -294,7 +125,8 @@ $("#confirm").click(function(){
             name4: val8,
             rate: rate
         };
-        db_add(params);
+        logDao.add(params);
+        location.reload(true);
     }catch(e){
         alert(JSON.stringify(e));
     }
@@ -303,11 +135,8 @@ $("#name1").focus();
 $("#tab").on("click",".delete",function(){
     if(confirm("确认删除吗？")){
         var id = $(this).closest("tr").data("id");
-        try{
-            db_delete(id);
-        }catch (e){
-            alert(JSON.stringify(e));
-        }
+        logDao.delete(id);
+        location.reload(true);
     }
 });
 $("#tab").on("click",".flag",function(){
@@ -319,7 +148,8 @@ $("#tab").on("click",".flag",function(){
     }
     var id = $(this).closest("tr").data("id");
     var flag = $(this).data("flag") * 1 + 1;
-    db_update(id, flag, status);
+    logDao.update(id, flag, status);
+    location.reload(true);
 });
 $("#tab").on("blur",".note",function(){
     var val = $(this).data("val");
@@ -328,7 +158,8 @@ $("#tab").on("blur",".note",function(){
     if(note == val){
         return;
     }
-    db_update_note(id, note);
+    logDao.update_note(id, note);
+    location.reload(true);
 });
 $("#date").keyup(function(e){
     if(e.keyCode == 13){
