@@ -1,13 +1,14 @@
 var $ = require("jquery");
 import  "./js/util/sgutil";
 let fs = require("fs");
+let path = require("path");
 let conf = require("./js/util/conf");
 
 let db_file = conf.db_file;
 var post_id = 1;
 
 function db_connect(callback){
-    let worker = new Worker(process.cwd() + "/js/util/worker.sql.js");
+    let worker = new Worker("https://s1.zhgtrade.com/common/js/worker.sql.js");
     worker.onerror = function(e) {console.log("Worker error: ", e)};
     let xhr = new XMLHttpRequest();
     xhr.open('GET', db_file, true);
