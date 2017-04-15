@@ -34,9 +34,9 @@ function find(day){
                 "<td class='gray'>"+rate+"</td>";
             for(var i=0;i<4;i++){
                 if(arr[i]<0){
-                    html+="<td class='red'><p>"+(arr[i])+"</p><p>"+brr[i]+"</p></td>";
+                    html+="<td><p class='red'>"+(arr[i])+"</p><p class='c_name'>"+brr[i]+"</p></td>";
                 }else{
-                    html+="<td><p>"+(arr[i])+"</p><p>"+brr[i]+"</p></td>";
+                    html+="<td><p class='green'>"+(arr[i])+"</p><p class='c_name'>"+brr[i]+"</p></td>";
                 }
             }
             html+="<td>"+(arr[0]+arr[2]+arr[3]+arr[1])+"</td>";
@@ -49,22 +49,22 @@ function find(day){
                     var result = (max-Math.ceil(20/num))*rate;
                     res +=result;
                     if(max-Math.ceil(20/num)<0){
-                        html+="<td class='red cp flag' data-flag='"+i+"' data-status='"+crr[i]+"'><p>"+result+"</p><p>"+brr[i]+"</p><div class='mask  "+flag+"'>√</div></td>";
+                        html+="<td class='cp flag' data-flag='"+i+"' data-status='"+crr[i]+"'><p class='red'>"+result+"</p><p class='c_name'>"+brr[i]+"</p><div class='mask  "+flag+"'></div></td>";
                     }else{
-                        html+="<td class='cp flag' data-flag='"+i+"' data-status='"+crr[i]+"'><p>"+result+"</p><p>"+brr[i]+"</p><div class='mask "+flag+"'>√</div></td>";
+                        html+="<td class='cp flag' data-flag='"+i+"' data-status='"+crr[i]+"'><p class='green'>"+result+"</p><p class='c_name'>"+brr[i]+"</p><div class='mask "+flag+"'></div></td>";
                     }
                 }else{
                     res+=(arr[i]*rate);
                     if(arr[i]<0){
-                        html+="<td class='red cp flag' data-flag='"+i+"' data-status='"+crr[i]+"'><p>"+(arr[i]*rate)+"</p><p>"+brr[i]+"</p><div class='mask "+flag+"'>√</div></td>";
+                        html+="<td class='cp flag' data-flag='"+i+"' data-status='"+crr[i]+"'><p class='red'>"+(arr[i]*rate)+"</p><p class='c_name'>"+brr[i]+"</p><div class='mask "+flag+"'></div></td>";
                     }else{
-                        html+="<td class='cp flag' data-flag='"+i+"' data-status='"+crr[i]+"'><p>"+(arr[i]*rate)+"</p><p>"+brr[i]+"</p><div class='mask "+flag+"'>√</div></td>";
+                        html+="<td class='cp flag' data-flag='"+i+"' data-status='"+crr[i]+"'><p class='green'>"+(arr[i]*rate)+"</p><p class='c_name'>"+brr[i]+"</p><div class='mask "+flag+"'></div></td>";
                     }
                 }
             }
             html+="<td>"+res+"</td>"+
                 "<td class='note blue' data-val='"+note+"' contenteditable='true'>"+note+"</td>"+
-                "<td><a href='javascript:;' class='delete red'>删除</a></td>"+
+                "<td><a href='javascript:;' class='delete blue'>删除</a></td>"+
                 "</tr>";
             $("#tab").append(html);
         }
